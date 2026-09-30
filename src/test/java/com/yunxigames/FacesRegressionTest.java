@@ -48,6 +48,16 @@ class FacesRegressionTest {
 	}
 
 	@Test
+	void endermanWeaponCalmMissingRecoversTrueExplicitFalseStaysFalse() throws Exception {
+		Files.writeString(configDir.resolve(FacesConfig.FILE_NAME), "{}");
+		assertTrue(FacesConfig.load().endermanWeaponCalm, "缺项 endermanWeaponCalm 必须补回 true");
+
+		Files.writeString(configDir.resolve(FacesConfig.FILE_NAME),
+				"{\"endermanWeaponCalm\": false}");
+		assertFalse(FacesConfig.load().endermanWeaponCalm, "显式 false 不许被偷改（关末影人特殊规则是合法选择）");
+	}
+
+	@Test
 	void corruptedConfigFallsBackToDefaults() throws Exception {
 		Files.writeString(configDir.resolve(FacesConfig.FILE_NAME), "{{{不是json");
 		FacesConfig cfg = FacesConfig.load();

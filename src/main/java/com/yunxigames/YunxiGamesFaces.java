@@ -23,13 +23,14 @@ public class YunxiGamesFaces implements ModInitializer {
 
 		// 自检（编号包内局部）：
 		// ① 配置钳制 ② 武器判定 ③ 态度判定（美食逐物种） ④ Goal 注入 ⑤ Boss 豁免
-		// ⑥ 非动物防崩（tempt_range 属性守卫，v1.0.0 崩服回归项）
+		// ⑥ 非动物防崩（tempt_range 属性守卫） ⑦ 末影人特殊（拿武器强制冷静）
 		SelfTest.registerStep("① 变脸·配置钳制", FacesSelfTest::checkConfigClamps);
 		SelfTest.registerStep("② 变脸·武器判定", FacesSelfTest::checkWeaponDetection);
 		SelfTest.registerStep("③ 变脸·态度判定", FacesSelfTest::checkAttitudes);
 		SelfTest.registerStep("④ 变脸·Goal 注入", FacesSelfTest::checkGoalInjection);
 		SelfTest.registerStep("⑤ 变脸·Boss 豁免", FacesSelfTest::checkExclusions);
 		SelfTest.registerStep("⑥ 变脸·非动物防崩", FacesSelfTest::checkTemptGuard);
+		SelfTest.registerStep("⑦ 变脸·末影人特殊", FacesSelfTest::checkEndermanSpecial);
 		SelfTest.register(() -> FacesConfig.get().selfTestRolls);
 
 		LoggerFactory.getLogger(LOGGER_NAME).info("[yg-faces] 变脸已加载：拿武器全场跑，拿美食喂动物，空手被围殴");

@@ -4,6 +4,7 @@
 	"package": "com.yunxigames.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"EnderManMixin",
 		"MobAttitudeMixin"
 	],
 	"injectors": {

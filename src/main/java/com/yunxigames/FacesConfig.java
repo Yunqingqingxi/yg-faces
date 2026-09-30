@@ -50,6 +50,13 @@ public final class FacesConfig extends YgConfig {
 	public double temptSpeed = 1.1;
 
 	/**
+	 * 末影人特殊规则：玩家主手拿战斗用品时<b>强制末影人冷静</b>——凝视 / 记仇 / 原版索敌
+	 * 全部不再把仇恨设到拿武器的玩家身上（愤怒中掏出武器立即脱战）。
+	 * 反方向「不拿武器时没看眼睛也愤怒」由变脸通用敌意索敌天然覆盖，无需单独开关。
+	 */
+	public boolean endermanWeaponCalm = true;
+
+	/**
 	 * 战斗用品判定：原版<b>物品标签</b>列表。默认剑 / 斧 / 矛三族（矛 = 26.2 新增的长矛，
 	 * {@code #minecraft:spears} 一个标签覆盖木→下界合金六种材质）。第三方 mod 往这些
 	 * 标签里加的武器自动生效，无需改本配置。

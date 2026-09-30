@@ -106,4 +106,9 @@ class FacesUnitTest {
 		assertFalse(cfg.weaponItems.isEmpty());
 		assertFalse(cfg.excludedMobs.isEmpty());
 	}
+
+	@Test
+	void endermanWeaponCalmDefaultsToTrue() {
+		assertTrue(fresh().endermanWeaponCalm, "新字段缺项（Gson 不跑字段初始化器）必须按 true 补回");
+	}
 }

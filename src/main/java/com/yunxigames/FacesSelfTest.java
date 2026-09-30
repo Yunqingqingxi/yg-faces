@@ -215,6 +215,34 @@ final class FacesSelfTest {
 		}
 	}
 
+	// ------------------------------------------------------------ ⑦ 末影人特殊（拿武器强制冷静）
+
+	/**
+	 * 末影人特殊规则自检：能测的是「链路在不在」——末影人参与变脸（不在豁免名单、
+	 * 是 PathfinderMob）、特殊开关默认开着。真实行为（凝视愤怒被压住 / 掏剑脱战）要进游戏
+	 * 目视确认 —— setTarget 拦截发生在运行期有玩家的场景，自检服务器上没有玩家。
+	 */
+	static void checkEndermanSpecial(SelfTest.Context ctx) {
+		FacesConfig config = FacesConfig.get();
+
+		check("末影人·特殊开关默认开", config.endermanWeaponCalm, "endermanWeaponCalm 缺项应补回 true");
+
+		Mob enderman = spawn(ctx.level, "minecraft:enderman");
+		if (enderman == null) {
+			check("末影人·测试实体构造", false, "enderman 构造失败");
+			return;
+		}
+
+		try {
+			check("末影人·参与变脸", MobAttitude.shouldInject(enderman),
+					"末影人不在豁免名单，敌意 / 恐惧 Goal 照常注入（没看眼睛也愤怒由它覆盖）");
+			check("末影人·是 PathfinderMob", enderman instanceof net.minecraft.world.entity.PathfinderMob,
+					"末影人走普通 Goal 体系（Boss 级不走体系的才天然排除）");
+		} finally {
+			enderman.discard();
+		}
+	}
+
 	// ------------------------------------------------------------ 工具
 
 	/** 构造一只测试生物（只 create 不进世界；构造器里变脸注入已经跑完）。 */

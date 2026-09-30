@@ -25,7 +25,8 @@
 | `MobAttitude` | **态度判定核心**（唯一真相源）：武器索引展开 + `attitudeOf` 纯函数（FEAR > TEMPT > HOSTILE）+ `shouldInject` |
 | `AttitudeGoals` | 三个 Goal + 注入逻辑（AvoidEntity / AttitudeTargetGoal / AttitudeAttackGoal / TemptGoal 守卫） |
 | `mixin/MobAttitudeMixin` | 挂 `Mob` **构造器 TAIL** 调 `AttitudeGoals.inject` |
-| `FacesSelfTest` | 本包自检 ①~⑥ |
+| `mixin/EnderManMixin` | 末影人特殊规则：`setTarget` HEAD 拦「拿武器玩家」+ `customServerAiStep` TAIL 掏剑脱战 |
+| `FacesSelfTest` | 本包自检 ①~⑦ |
 
 ### 三条设计底线 / 向后兼容承诺
 
@@ -90,4 +91,8 @@ JAVA_HOME='D:\Java\jdk-25' ./gradlew build --offline
   （恐惧判定只对「拿武器的玩家」）；
 - 变脸近战**不读原版 ATTACK_DAMAGE 属性**（牛羊没有），覆写 `checkAndPerformAttack`
   按配置伤害直接 `hurtServer` 结算——硬补属性要动 DefaultAttributes 全局表，别做；
-- 美食判定复用 `Animal#isFood`（mod 动物自动兼容），敌对生物不是 Animal 天然无豁免。
+- 美食判定复用 `Animal#isFood`（mod 动物自动兼容），敌对生物不是 Animal 天然无豁免；
+- **末影人特殊（v1.2.0）**：三条愤怒路（凝视 EndermanLookForPlayerGoal / 记仇 persistent anger /
+  原版索敌）最后都汇聚到 `EnderMan#setTarget(LivingEntity)`——在该汇聚点 HEAD 拦「目标=拿武器玩家」
+  一刀切全部，`customServerAiStep` TAIL 补一刀掏剑脱战；**记仇不主动清**（收剑立刻翻脸，玩法气质）；
+  mixin 里 `this instanceof 目标类` 编不过，要走 `((Object) this) instanceof EnderMan`。
