@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "yg_faces",
+	"version": "${version}",
+	"name": "yunxigames 变脸",
+	"description": "变脸：生物对玩家的态度由玩家主手决定——拿武器全场掉头就跑，拿某生物的美食该生物不攻击还被诱惑跟着走，拿其他任何东西（包括空手）所有生物都尝试攻击玩家。",
+	"authors": [
+		"Yunqingqingxi"
+	],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.yunxigames.YunxiGamesFaces"
+		]
+	},
+	"mixins": [
+		"yg-faces.mixins.json"
+	],
+	"depends": {
+		"fabricloader": "~0.19.5",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

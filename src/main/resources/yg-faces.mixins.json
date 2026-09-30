@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.yunxigames.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"MobAttitudeMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
