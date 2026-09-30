@@ -2,6 +2,16 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循语义化版本。
 
+## [1.0.1] - 2026-09-30
+
+### 修复
+
+- **崩服（发光鱿鱼等非动物生物）**：26.2 的 `TemptGoal.canUse` 逐刻读 `minecraft:tempt_range` 属性，
+  该属性只有带诱惑 AI 的动物（牛羊猪鸡……）才有——鱿鱼 / 蝙蝠 / 铁傀儡这类非动物 PathfinderMob
+  的属性表里没有，v1.0.0 把诱惑 Goal 挂给它们后第一个 AI 刻就 `IllegalArgumentException` 崩服。
+  现在注册前守卫：没有 `tempt_range` 属性的生物不再注册诱惑 Goal（恐惧 / 敌意照常参与）。
+- 自检新增 ⑥「非动物防崩」回归项（构造发光鱿鱼验证不再挂 TemptGoal）。
+
 ## [1.0.0] - 2026-09-30
 
 ### 新增

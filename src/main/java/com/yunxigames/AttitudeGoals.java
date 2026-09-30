@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -55,8 +56,14 @@ public final class AttitudeGoals {
 		goalSelector.addGoal(3, new AttitudeAttackGoal(pathfinder, config.attackDamage));
 
 		// ④ 诱惑：拿着本生物的美食时被牵着走（canScare=false：玩家疾跑也不吓跑它）。
-		goalSelector.addGoal(4, new TemptGoal(pathfinder, config.temptSpeed,
-				stack -> MobAttitude.isFavoriteFood(mob, stack), false));
+		//    26.2 的 TemptGoal.canUse 逐刻读 minecraft:tempt_range 属性，而该属性只有带
+		//    诱惑 AI 的动物（牛羊猪鸡……）才有——鱿鱼 / 蝙蝠 / 铁傀儡这类非动物 PathfinderMob
+		//    的属性表里没有，直接挂上去就会 IllegalArgumentException 崩服（v1.0.0 实际事故）。
+		//    美食判定本来只对 Animal 生效，这里再挡一道「没有属性就不注册」双保险。
+		if (pathfinder.getAttribute(Attributes.TEMPT_RANGE) != null) {
+			goalSelector.addGoal(4, new TemptGoal(pathfinder, config.temptSpeed,
+					stack -> MobAttitude.isFavoriteFood(mob, stack), false));
+		}
 	}
 
 	/**

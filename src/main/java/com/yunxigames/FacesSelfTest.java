@@ -182,6 +182,39 @@ final class FacesSelfTest {
 		}
 	}
 
+	// ------------------------------------------------------------ ⑥ 非动物防崩（tempt_range 属性守卫）
+
+	/**
+	 * v1.0.0 崩服事故的回归自检：26.2 的 {@code TemptGoal.canUse} 逐刻读
+	 * {@code minecraft:tempt_range} 属性，鱿鱼 / 发光鱿鱼这类非动物 PathfinderMob 没有它，
+	 * 构造期挂上 TemptGoal 后第一个 AI 刻就崩服。守卫后：非动物不再注册诱惑 Goal，
+	 * 但恐惧 / 敌意照常参与。
+	 */
+	static void checkTemptGuard(SelfTest.Context ctx) {
+		Level level = ctx.level;
+		Mob glowSquid = spawn(level, "minecraft:glow_squid");
+		if (glowSquid == null) {
+			check("防崩·测试实体构造", false, "glow_squid 构造失败");
+			return;
+		}
+
+		try {
+			boolean hasTempt = false;
+			for (var wrapped : glowSquid.getGoalSelector().getAvailableGoals()) {
+				if (wrapped.getGoal() instanceof TemptGoal) {
+					hasTempt = true;
+				}
+			}
+
+			check("防崩·发光鱿鱼不挂诱惑 Goal", !hasTempt,
+					"没有 tempt_range 属性的生物绝不注册 TemptGoal（v1.0.0 崩服回归项）");
+			check("防崩·非动物仍参与变脸", MobAttitude.shouldInject(glowSquid),
+					"鱿鱼不在豁免名单，恐惧 / 敌意照常生效");
+		} finally {
+			glowSquid.discard();
+		}
+	}
+
 	// ------------------------------------------------------------ 工具
 
 	/** 构造一只测试生物（只 create 不进世界；构造器里变脸注入已经跑完）。 */
