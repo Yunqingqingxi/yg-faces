@@ -1,6 +1,8 @@
 package com.yunxigames;
 
+import com.yunxigames.command.FacesCommand;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,11 @@ public class YunxiGamesFaces implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		FacesConfig.load();
+
+		// 游戏内命令：/yg faces on|off|status（off 后新生物不变脸，已注入 Goal 的重启世界恢复）
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+				FacesCommand.register(dispatcher));
+
 		// 注意：武器索引（MobAttitude.reindex）不能在这里展开 —— 入口期物品标签还没 bind，
 		// getTagOrEmpty 会抛 IllegalStateException。首次 isWeapon 时惰性展开（见 MobAttitude）。
 
