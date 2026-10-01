@@ -4,8 +4,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -111,9 +113,45 @@ public final class MobAttitude {
 	}
 
 	/**
+	 * 态度层：这只生物对该主手物品是否「不该有仇恨」——恐惧（武器）与诱惑（美食）
+	 * 都意味着玩家不是合法攻击目标。纯函数，供自检直接断言；运行期走
+	 * {@link #shouldDropTarget}（含开关与豁免判断）。
+	 */
+	public static boolean attitudeBlocksHostility(Mob mob, ItemStack hand) {
+		return attitudeOf(mob, hand) != Attitude.HOSTILE;
+	}
+
+	/**
+	 * 冷静规则（变脸 v1.2.1 的<b>通用仇恨切断</b>）：要不要拦下「{@code mob} 把仇恨
+	 * 设到 {@code target}」这次调用。
+	 *
+	 * <p><b>为什么必须拦在 setTarget 而不是靠逃跑 Goal 压制攻击 Goal</b>：原版敌对生物
+	 * 自带索敌 Goal，每刻都会把可见玩家设为目标——它不认识变脸态度，拿剑的玩家照选；
+	 * 逃跑 Goal 只占 MOVE 旗标，攻击途径五花八门（距离边缘抖动、记仇 anger 系统、
+	 * 不占 MOVE 的特殊攻击），压制总有空窗。而原版所有愤怒来源（普通索敌 / HurtByTarget
+	 * 记仇 / anger 系统 / 末影人凝视）最终都汇聚到 {@code Mob#setTarget} —— 在这个
+	 * 汇聚点拦「目标是非敌意态度的玩家」，等于一刀切掉全部来源，恶魂这类
+	 * 非 PathfinderMob（不注入 Goal）也一并覆盖（恶魂喷火球的前提就是 target 非空）。
+	 *
+	 * <p>豁免名单（凋灵 / 监守者）不参与：Boss 照常攻击，与 Goal 注入的豁免语义一致。
+	 */
+	public static boolean shouldDropTarget(Mob mob, LivingEntity target) {
+		if (!(target instanceof Player player)) {
+			return false;
+		}
+		FacesConfig config = FacesConfig.get();
+		if (!config.facesEnabled
+				|| config.isMobExcluded(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()))) {
+			return false;
+		}
+		return attitudeBlocksHostility(mob, player.getMainHandItem());
+	}
+
+	/**
 	 * 这只生物要不要被注入变脸 Goal：
 	 * 总开关开着、不在豁免名单（Boss）、且是 {@link PathfinderMob}（有寻路才能追人/逃跑；
-	 * 幻翼、恶魂这类非寻路飞行生物不参与，与系列「自检要在真服务器跑」的约定一致）。
+	 * 幻翼、恶魂这类非寻路飞行生物不参与 Goal 注入——它们由 {@link #shouldDropTarget}
+	 * 在 setTarget 层覆盖「拿武器不攻击」，只是做不了逃跑）。
 	 */
 	public static boolean shouldInject(Mob mob) {
 		FacesConfig config = FacesConfig.get();

@@ -21,8 +21,10 @@ import net.minecraft.world.entity.player.Player;
  *
  * <p>优先级设计（数字越小越优先，全部压过原版同类）：
  * <ol>
- *   <li>{@code 0} 恐惧逃跑（只占 MOVE 旗标，与原版 FloatGoal 的 JUMP 旗标不冲突，
- *       且能压过苦力怕的点燃（1）与僵尸的近战（2）—— 见你拿剑，点燃都点不起来）；</li>
+ *   <li>{@code 0} 恐惧逃跑（只占 MOVE 旗标，与原版 FloatGoal 的 JUMP 旗标不冲突）——
+ *       拿剑靠近时让生物掉头就跑；「拿武器仍被攻击」的根本防线在
+ *       {@code MobAttitudeMixin} 的 setTarget 通用切断（v1.2.1），本 Goal 负责跑，
+ *       那条负责不打；</li>
  *   <li>{@code 3} 变脸近战（与原版生物自身目标并列，只在「敌意」态度时追打）；</li>
  *   <li>{@code 4} 美食诱惑（最低，敌意/恐惧在场时永远让位）。</li>
  * </ol>

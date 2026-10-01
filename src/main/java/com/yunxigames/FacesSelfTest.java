@@ -215,31 +215,43 @@ final class FacesSelfTest {
 		}
 	}
 
-	// ------------------------------------------------------------ ⑦ 末影人特殊（拿武器强制冷静）
+	// ------------------------------------------------------------ ⑦ 通用冷静规则（setTarget 切断）
 
 	/**
-	 * 末影人特殊规则自检：能测的是「链路在不在」——末影人参与变脸（不在豁免名单、
-	 * 是 PathfinderMob）、特殊开关默认开着。真实行为（凝视愤怒被压住 / 掏剑脱战）要进游戏
-	 * 目视确认 —— setTarget 拦截发生在运行期有玩家的场景，自检服务器上没有玩家。
+	 * v1.2.1 修复「拿武器仍被敌对/地狱生物攻击」的核心规则自检：能测的是态度层与
+	 * 链路在不在 —— 拿武器 / 空手的态度分流、末影人与史莱姆家族都还在变脸覆盖范围。
+	 * 真实行为（原版索敌被 setTarget 拦截、掏剑脱战、岩浆怪碰上不掉血）发生在运行期
+	 * 有玩家的场景，自检服务器上没有玩家，要进游戏目视确认。
 	 */
-	static void checkEndermanSpecial(SelfTest.Context ctx) {
-		FacesConfig config = FacesConfig.get();
+	static void checkUniversalCalm(SelfTest.Context ctx) {
+		Level level = ctx.level;
+		Mob zombie = spawn(level, "minecraft:zombie");
+		Mob enderman = spawn(level, "minecraft:enderman");
+		Mob magmaCube = spawn(level, "minecraft:magma_cube");
 
-		check("末影人·特殊开关默认开", config.endermanWeaponCalm, "endermanWeaponCalm 缺项应补回 true");
-
-		Mob enderman = spawn(ctx.level, "minecraft:enderman");
-		if (enderman == null) {
-			check("末影人·测试实体构造", false, "enderman 构造失败");
+		if (zombie == null || enderman == null || magmaCube == null) {
+			check("冷静·测试实体构造", false, "zombie/enderman/magma_cube 构造失败（注册表缺项？）");
 			return;
 		}
 
 		try {
-			check("末影人·参与变脸", MobAttitude.shouldInject(enderman),
-					"末影人不在豁免名单，敌意 / 恐惧 Goal 照常注入（没看眼睛也愤怒由它覆盖）");
-			check("末影人·是 PathfinderMob", enderman instanceof net.minecraft.world.entity.PathfinderMob,
-					"末影人走普通 Goal 体系（Boss 级不走体系的才天然排除）");
+			check("冷静·拿剑玩家不构成仇恨（态度层）",
+					MobAttitude.attitudeBlocksHostility(zombie, new ItemStack(Items.IRON_SWORD))
+							&& MobAttitude.attitudeBlocksHostility(zombie, new ItemStack(Items.BOW)),
+					"FEAR 不是合法攻击目标");
+			check("冷静·空手玩家照常敌意（态度层）",
+					!MobAttitude.attitudeBlocksHostility(zombie, ItemStack.EMPTY),
+					"空手时原版敌对行为不受影响");
+			check("冷静·末影人仍在覆盖范围", MobAttitude.shouldInject(enderman)
+					&& MobAttitude.attitudeBlocksHostility(enderman, new ItemStack(Items.IRON_SWORD)),
+					"凝视/记仇/索敌汇聚到 setTarget 一并切断（原 EnderManMixin 职责）");
+			check("冷静·岩浆怪仍在覆盖范围", MobAttitude.shouldInject(magmaCube)
+					&& MobAttitude.attitudeBlocksHostility(magmaCube, new ItemStack(Items.IRON_SWORD)),
+					"立方怪碰撞伤害由 playerTouch 拦截（AbstractCubeMobMixin 职责）");
 		} finally {
+			zombie.discard();
 			enderman.discard();
+			magmaCube.discard();
 		}
 	}
 
